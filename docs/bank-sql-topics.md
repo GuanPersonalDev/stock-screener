@@ -7,18 +7,19 @@
 
 | 實務需求 | 銀行情境 | 關鍵語法 | 在本專案的練習 |
 |---|---|---|---|
-| 報表彙總 | 分行、產品、月份的交易量與餘額統計 | `GROUP BY`、`HAVING`、`CASE` | Day 3 |
-| 對帳與差異比對 | 核心系統與外部檔案逐筆比對 | `LEFT JOIN … IS NULL`、`NOT EXISTS`、`EXCEPT` | Day 5 |
+| 報表彙總 | 分行、產品、月份的交易量與餘額統計 | `GROUP BY`、`HAVING`、`CASE` | Day 2 |
+| 對帳與差異比對 | 核心系統與外部檔案逐筆比對 | `LEFT JOIN … IS NULL`、`NOT EXISTS`、`EXCEPT` | Day 7、Day 19 |
 | 取最新狀態 | 每位客戶最新一筆的評等、餘額 | `ROW_NUMBER() OVER (PARTITION BY …)` | Day 8 |
 | 時間序列計算 | 日均餘額、累計交易、與前期比較 | `LAG`、`SUM() OVER`、視窗框架 | Day 8–9 |
-| 批次匯入 | 每日夜間批次將檔案寫進資料庫 | 參數化查詢、`MERGE`、交易 | Day 7 |
-| 預存程序 | 報表、批次邏輯、權限控管 | `CREATE PROCEDURE`、`TRY … CATCH` | Day 10 |
+| 批次匯入 | 每日夜間批次將檔案寫進資料庫 | 參數化查詢、`MERGE`、交易 | Day 5–6 |
+| 預存程序 | 報表、批次邏輯、權限控管 | `CREATE PROCEDURE`、`TRY … CATCH` | Day 10、Day 14–18 |
 | 效能調校 | 大表查詢太慢 | 索引、執行計畫、SARGable | Day 11 |
-| 資料品質 | 重複、缺漏、異常值檢查 | `GROUP BY … HAVING COUNT(*) > 1` | Day 13 |
-| 批次紀錄與稽核 | 每次批次執行留紀錄 | log 表設計 | Day 13 |
+| 資料品質 | 重複、缺漏、異常值檢查 | `GROUP BY … HAVING COUNT(*) > 1` | Day 7 |
+| 批次紀錄與稽核 | 每次批次執行留紀錄 | log 表設計 | Day 6 |
 | 金額精確度 | 利息、餘額計算 | `DECIMAL`，不用 `FLOAT` | Day 2 |
+| 帳務設計 | 只新增的流水帳、沖正、圈存、T+2 交割 | 交易、狀態欄位、`CHECK` | Day 12–16 |
 
-## 兩週後可延伸（這次不做）
+## 之後可延伸（這次不做）
 
 - **資料倉儲**：事實表與維度表（star schema）、緩慢變動維度（SCD Type 2）
 - **交易隔離等級**：`READ COMMITTED`、`SNAPSHOT`、死結（deadlock）

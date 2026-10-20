@@ -1,7 +1,8 @@
 # sql-stock-screener
 
-兩週 SQL 學習專案：爬取台股每日行情與估值資料，寫入 MS SQL Server，
-以視窗函數與預存程序計算選股條件，最後用 Streamlit 做成網頁選股面板。
+21 天 SQL 學習專案：爬取台股每日行情、估值與除權息資料，寫入 MS SQL Server，
+以視窗函數與預存程序實作選股、模擬交易（隔日開盤成交、T+2 交割）與持倉損益，
+最後用 Streamlit 做成網頁面板。
 
 > 進行中。學習計畫見 [docs/learning-map.md](docs/learning-map.md)。
 
