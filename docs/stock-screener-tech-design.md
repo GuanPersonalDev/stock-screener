@@ -22,7 +22,9 @@
 
 | 模組 | 所在層級 | 職責 | 檔案路徑 |
 |---|---|---|---|
-| TwseClient | 爬蟲 | 向 TWSE 取得行情、估值、除權息、休市日，含快取、重試與限速 | crawler/twse_client.py |
+| HttpFetcher | 爬蟲 | 通用 HTTP 取得工具：raw 快取、限速、重試，不認識證交所 | crawler/http_fetcher.py |
+| CrawlerConfig | 爬蟲 | 讀取設定檔，依資料集 key 提供 url 與固定查詢參數 | crawler/crawler_config.py、crawler/config.toml |
+| TwseClient | 爬蟲 | Facade：組合 HttpFetcher 與 CrawlerConfig，提供行情、估值、除權息、休市日，並呼叫 cleaners 轉型 | crawler/twse_client.py |
 | cleaners | 爬蟲 | 數字與民國日期的字串解析 | crawler/cleaners.py |
 | StockRepository | 爬蟲 | 批次寫入資料庫、維護 crawl_status 與 etl_log、呼叫每日預存程序 | crawler/repository.py |
 | run_daily | 爬蟲 | 每日批次的串接順序 | crawler/run_daily.py |
@@ -95,13 +97,76 @@
 
 ## 3. 類別設計
 
+### HttpFetcher
+
+**職責：** 通用的 HTTP 取得工具，不認識證交所。負責三件事：raw 快取（`{cache_dir}/{dataset}/{YYYYMMDD}.json`，檔案存在就讀檔、不發請求）、限速（兩次真正發出的請求間隔至少 `min_interval` 秒，讀快取不算）、重試（網路錯誤、HTTP 錯誤、回應不是 JSON 時重試，間隔逐次加長，最後一次仍失敗就丟出例外）。是否寫入快取由呼叫端決定，只有 `stat` 為 OK 的回應才會被快取。
+
+**介面：**
+```python
+class HttpFetcher:
+    def __init__(self, cache_dir: Path = Path("data/raw"), min_interval: float = 3.0, max_retries: int = 3): ...
+
+    def get_json(self, url: str, params: dict) -> dict:
+        """發出 GET 請求並回傳 JSON；含限速與重試，全部失敗時丟出例外。"""
+        ...
+
+    def read_cache(self, dataset: str, trade_date: date) -> dict | None:
+        """回傳快取內容；沒有快取時回傳 None。"""
+        ...
+
+    def write_cache(self, dataset: str, trade_date: date, payload: dict) -> None: ...
+```
+
+**依賴：**
+- 輸入來源：HTTP 端點、`data/raw/` 快取檔
+- 輸出去向：TwseClient
+
+### CrawlerConfig
+
+**職責：** 以內建 `tomllib` 讀取 `crawler/config.toml`，依資料集 key 提供 url 與固定查詢參數。只放常數，不放解析邏輯。
+
+設定檔格式範例：
+```toml
+[datasets.daily_quotes]
+url = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
+params = { type = "ALLBUT0999", response = "json" }
+
+[datasets.daily_valuations]
+url = "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d"
+params = { selectType = "ALL", response = "json" }
+```
+
+**介面：**
+```python
+class CrawlerConfig:
+    def __init__(self, path: Path = Path("crawler/config.toml")): ...
+
+    def url(self, key: str) -> str:
+        """回傳該資料集的 url；key 不存在時丟出 KeyError。"""
+        ...
+
+    def params(self, key: str) -> dict:
+        """回傳該資料集的固定查詢參數（不含日期）；key 不存在時丟出 KeyError。"""
+        ...
+```
+
+**依賴：**
+- 輸入來源：`crawler/config.toml`
+- 輸出去向：TwseClient
+
 ### TwseClient
 
-**職責：** 向 TWSE 取得原始資料。先查 raw 快取檔，命中就不發請求。`stat` 非 OK 視為非交易日，回傳空清單。網路錯誤重試 3 次，間隔逐次加長。請求間隔至少 3 秒。
+**職責：** Facade，組合 HttpFetcher 與 CrawlerConfig，對外提供證交所資料。`fetch_raw` 以 key 取得某日原始 JSON：先查快取，沒有才組參數（固定參數加日期）發請求；`stat` 非 OK 視為非交易日，回傳 None 且不快取；OK 才寫入快取。具名方法呼叫 `fetch_raw` 後負責解析（行情從 `tables` 中以 fields 含「證券代號」找出個股表；估值直接取 `data`），並呼叫 cleaners 轉型，回傳以 DDL 欄位名為 key 的 dict；非交易日回傳空清單。
 
 **介面：**
 ```python
 class TwseClient:
+    def __init__(self, fetcher: HttpFetcher | None = None, config: CrawlerConfig | None = None): ...
+
+    def fetch_raw(self, key: str, trade_date: date) -> dict | None:
+        """取得指定資料集某日的原始 JSON；非交易日回傳 None。"""
+        ...
+
     def fetch_daily_quotes(self, trade_date: date) -> list[dict]:
         """取得指定日期的上市證券每日行情；非交易日回傳空清單。"""
         ...
@@ -120,8 +185,8 @@ class TwseClient:
 ```
 
 **依賴：**
-- 輸入來源：TWSE 公開端點、`data/raw/` 快取檔
-- 輸出去向：run_daily、run_backfill（再交給 cleaners 與 StockRepository）
+- 輸入來源：HttpFetcher、CrawlerConfig、cleaners
+- 輸出去向：run_daily、run_backfill（再交給 StockRepository）
 
 ### cleaners
 
@@ -139,8 +204,8 @@ def parse_roc_date(raw: str) -> date:
 ```
 
 **依賴：**
-- 輸入來源：TwseClient 回傳的原始欄位字串
-- 輸出去向：StockRepository 寫入前的清理步驟
+- 輸入來源：TwseClient 解析出的原始欄位字串
+- 輸出去向：TwseClient（轉型後再回傳給呼叫端）
 
 ### StockRepository
 
