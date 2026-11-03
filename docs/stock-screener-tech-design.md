@@ -139,7 +139,7 @@ params = { selectType = "ALL", response = "json" }
 **介面：**
 ```python
 class CrawlerConfig:
-    def __init__(self, path: Path = Path("crawler/config.toml")): ...
+    def __init__(self, path: Path = Path(__file__).parent / "config.toml"): ...
 
     def url(self, key: str) -> str:
         """回傳該資料集的 url；key 不存在時丟出 KeyError。"""

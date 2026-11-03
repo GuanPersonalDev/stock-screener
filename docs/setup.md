@@ -59,7 +59,7 @@ uv init --python 3.13
 
 ## 4. 資料來源：台灣證券交易所
 
-| 資料 | 端點（Day 6 先用瀏覽器確認，改版以官網為準） |
+| 資料 | 端點（Day 4 先用瀏覽器確認，改版以官網為準） |
 |---|---|
 | 每日全部個股收盤行情 | `https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=YYYYMMDD&type=ALLBUT0999&response=json` |
 | 每日本益比、殖利率、股價淨值比 | `https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=YYYYMMDD&selectType=ALL&response=json` |

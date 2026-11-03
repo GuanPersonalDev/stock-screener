@@ -124,7 +124,9 @@ Claude 負責的面板 Issue 與你的進度並行，不占你的天數：
 **實作**
 1. 先用瀏覽器打開 TWSE 端點確認 JSON 欄位（端點見 [setup.md](setup.md)）
 2. `crawler/cleaners.py`：`parse_number`、`parse_roc_date`
-3. `crawler/twse_client.py`：`fetch_daily_quotes`、`fetch_daily_valuations`
+3. `crawler/http_fetcher.py`：`HttpFetcher`（限速、重試、raw 快取，不認識證交所）
+4. `crawler/config.toml`、`crawler/crawler_config.py`：`CrawlerConfig`（依資料集 key 提供 url 與固定參數）
+5. `crawler/twse_client.py`：`TwseClient`（Facade）的 `fetch_raw`、`fetch_daily_quotes`、`fetch_daily_valuations`
 
 **驗收**
 - [ ] 非交易日回傳空清單，不丟例外
