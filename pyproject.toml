@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "TWSE stock screener and simulated trading with MS SQL Server"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "requests>=2.34.2",
+]
 
 [dependency-groups]
 dev = [

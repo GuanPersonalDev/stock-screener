@@ -1,0 +1,7 @@
+[datasets.daily_quotes]
+url = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
+params = { type = "ALLBUT0999", response = "json" }
+
+[datasets.daily_valuations]
+url = "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d"
+params = { selectType = "ALL", response = "json" }
