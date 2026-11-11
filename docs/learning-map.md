@@ -140,7 +140,10 @@ Claude 負責的面板 Issue 與你的進度並行，不占你的天數：
 - 交易：`BEGIN TRAN`／`COMMIT`／`ROLLBACK`；一天的資料要嘛全進、要嘛全不進
 - 銀行 ETL 的標準做法：先批次寫進暫存表 `#staging`，再用一個 `MERGE` 合併
 
-**實作**：`crawler/repository.py` 的 `StockRepository`（`upsert_*`、`mark_crawl_status`、`write_etl_log`）
+**實作**
+1. `crawler/repository.py` 的 `StockRepository`（`transaction()`、`upsert_*`、`mark_crawl_status`、`get_crawl_status`、`write_etl_log`）；寫入方法不 commit，由呼叫端以 `transaction()` 包住一天的寫入
+2. `crawler/database_define.py` 集中表名、欄位名與狀態值
+3. `tests/test_repository.py`：連 Docker 資料庫的整合測試，連不上就 skip
 
 **驗收**
 - [ ] 同一天寫入兩次，資料不重複

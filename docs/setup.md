@@ -12,6 +12,9 @@ SQL Server 官方映像只有 x86_64 版本，Apple Silicon 要靠 Rosetta 模�
 
    ```
    MSSQL_SA_PASSWORD=<自己設定>
+   MSSQL_HOST=localhost
+   MSSQL_PORT=1433
+   MSSQL_DATABASE=StockLab
    ```
 
    密碼至少 8 碼，且包含大寫、小寫、數字、符號其中三種，否則容器會啟動失敗。

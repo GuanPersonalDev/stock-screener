@@ -214,6 +214,16 @@ def parse_roc_date(raw: str) -> date:
 **介面：**
 ```python
 class StockRepository:
+    @classmethod
+    def from_env(cls) -> Self:
+        """從 .env 讀連線設定，以 autocommit=False 連線。"""
+        ...
+
+    @contextmanager
+    def transaction(self):
+        """區塊正常結束時 commit，發生例外時 rollback 後再丟出。寫入方法本身都不 commit。"""
+        ...
+
     def upsert_stocks(self, rows: list[dict]) -> int: ...
     def upsert_daily_prices(self, rows: list[dict]) -> int: ...
     def upsert_valuations(self, rows: list[dict]) -> int: ...
