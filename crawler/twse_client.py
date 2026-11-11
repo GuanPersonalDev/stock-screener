@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from crawler.cleaners import parse_number
 from crawler.crawler_config import CrawlerConfig
+from crawler.database_define import Col
 from crawler.http_fetcher import HttpFetcher
 
 
@@ -39,15 +40,15 @@ class TwseClient:
         col = {name: i for i, name in enumerate(table["fields"])}
         return [
             {
-                "stock_id": row[col["證券代號"]].strip(),
-                "stock_name": row[col["證券名稱"]].strip(),
-                "trade_date": trade_date,
-                "open_price": parse_number(row[col["開盤價"]]),
-                "high_price": parse_number(row[col["最高價"]]),
-                "low_price": parse_number(row[col["最低價"]]),
-                "close_price": parse_number(row[col["收盤價"]]),
-                "trade_volume": _to_int(parse_number(row[col["成交股數"]])),
-                "trade_value": _to_int(parse_number(row[col["成交金額"]])),
+                Col.STOCK_ID: row[col["證券代號"]].strip(),
+                Col.STOCK_NAME: row[col["證券名稱"]].strip(),
+                Col.TRADE_DATE: trade_date,
+                Col.OPEN_PRICE: parse_number(row[col["開盤價"]]),
+                Col.HIGH_PRICE: parse_number(row[col["最高價"]]),
+                Col.LOW_PRICE: parse_number(row[col["最低價"]]),
+                Col.CLOSE_PRICE: parse_number(row[col["收盤價"]]),
+                Col.TRADE_VOLUME: _to_int(parse_number(row[col["成交股數"]])),
+                Col.TRADE_VALUE: _to_int(parse_number(row[col["成交金額"]])),
             }
             for row in table["data"]
         ]
@@ -61,11 +62,11 @@ class TwseClient:
         col = {name: i for i, name in enumerate(payload["fields"])}
         return [
             {
-                "stock_id": row[col["證券代號"]].strip(),
-                "trade_date": trade_date,
-                "price_to_earnings_ratio": parse_number(row[col["本益比"]]),
-                "dividend_yield": parse_number(row[col["殖利率(%)"]]),
-                "price_to_book_ratio": parse_number(row[col["股價淨值比"]]),
+                Col.STOCK_ID: row[col["證券代號"]].strip(),
+                Col.TRADE_DATE: trade_date,
+                Col.PRICE_TO_EARNINGS_RATIO: parse_number(row[col["本益比"]]),
+                Col.DIVIDEND_YIELD: parse_number(row[col["殖利率(%)"]]),
+                Col.PRICE_TO_BOOK_RATIO: parse_number(row[col["股價淨值比"]]),
             }
             for row in payload["data"]
         ]
